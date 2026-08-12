@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # models and vector store
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_pinecone import PineconeVectorStore
 
@@ -24,9 +24,8 @@ def generate_rag_response(user_query: str, index_name: str = "rag-project"):
     """
 
     # initialize embedding model
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-2-preview",
-        output_dimensionality=768
+    embeddings = HuggingFaceEmbeddings(
+        model="BAAI/bge-base-en-v1.5"
     )
 
     vector_store = PineconeVectorStore(
