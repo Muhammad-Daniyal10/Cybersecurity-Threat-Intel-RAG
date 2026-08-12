@@ -13,7 +13,6 @@ from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv(override=True)
 
-print("Google Key Found:", bool(os.getenv("GOOGLE_API_KEY")))
 print("Groq Key Found:", bool(os.getenv("GROQ_API_KEY")))
 print("Pinecone Key Found:", bool(os.getenv("PINECONE_API_KEY")))
 
@@ -39,7 +38,7 @@ def generate_rag_response(user_query: str, index_name: str = "rag-project"):
     #initializ text gen model
     llm = ChatGroq(
         model="llama-3.3-70b-versatile",
-        temperature=0.3
+        temperature=0.5
     )
 
 

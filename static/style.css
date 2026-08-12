@@ -31,6 +31,46 @@ body{
     font-size: 1.2rem;
 }
 
+.info-card{
+    background-color: white;
+    border-left: 4px solid #1a365d;
+    padding: 12px 18px;
+    margin: 15px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #2d3784;
+    line-height: 1.4;
+}
+
+.info-card h3{
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #1a365d;
+    font-size: 1.1em;
+}
+
+.info-card p{
+    margin: 0 0 8px 0;
+}
+
+.info-card ul{
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-card li{
+    margin-bottom: 4px;
+}
+
+
+
+
+
+
+
+
+
+
 .chat-box{
     flex: 1;
     padding: 1rem;
