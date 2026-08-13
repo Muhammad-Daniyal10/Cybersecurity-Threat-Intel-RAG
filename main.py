@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from services.rag import generate_rag_response
 from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from services.rag import stream_rag_response
 
 # initialize the FastAPI application
 
@@ -24,12 +26,13 @@ def read_root():
 
 # create primary API endpoint
 @app.post("/ask")
-def ask_question(request: QuestionRequest):
-    try:
-        print(f"\n--- New API request received ---")
-        # pass incoming query to existing RAG pipeline
-        answer = generate_rag_response(request.query)
-        return {"answer": answer}
-    except Exception as e:
-        # return clean 500 error if anything in pipeline fails
-        raise HTTPException(status_code=500, detail=str(e))
+def ask_question(request: dict):
+    user_query = request.get("query")
+
+    if not user_query:
+        return {"Error": "No query provided"}
+
+    return StreamingResponse(
+        stream_rag_response(user_query),
+        media_type="text/event-stream"
+    )

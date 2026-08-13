@@ -76,3 +76,39 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Error during RAG execution: {e}")
+
+
+def stream_rag_response(user_query: str, index_name: str = "rag-project"):
+    """
+    takes a user query, retrieves relevant chunks and streams
+    the generated response back token by token
+    """
+
+    from langchain_huggingface import HuggingFaceEmbeddings
+    embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-en-v1.5")
+
+    vector_store = PineconeVectorStore(index_name=index_name, embedding=embeddings)
+    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
+
+    system_prompt = (
+        "You are a cybersecurity expert analyzing a threat report. "
+        "Use the following retrieved context to answer the user's question. "
+        "Keep your answer concise and factual.\n\n"
+        "{context}"
+    )
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "{input}"),
+    ])
+
+    question_answer_chain = create_stuff_documents_chain(llm , prompt)
+    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+
+    # stream output
+    print(f"Streaming RAG pipeline for query: '{user_query}' \n")
+    for chunk in rag_chain.stream({"input": user_query}):
+        if "answer" in chunk:
+            yield chunk["answer"]

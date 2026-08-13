@@ -95,6 +95,35 @@ body{
     word-wrap: break-word;
 }
 
+.message.thinking{
+    color: #718096;
+    font-style: italic;
+    background-color: #edf2f7;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse{
+    0%{
+        opacity: 0.5;
+    }
+    50%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0.5;
+    }
+}
+
+.message.error-message {
+    color: #c53030;
+    background-color: #fff5f5;
+    border: 1px solid #feb2b2;
+}
+
+
+
+
+
 .user-msg{
     background: #3498db;
     color: white;
