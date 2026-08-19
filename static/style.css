@@ -94,6 +94,7 @@ body{
     line-height: 1.4;
     font-size: 0.95em;
     word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
 .message.thinking{

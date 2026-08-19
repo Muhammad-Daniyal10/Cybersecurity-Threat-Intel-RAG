@@ -90,7 +90,7 @@ def stream_rag_response(user_query: str, index_name: str = "rag-project"):
     vector_store = PineconeVectorStore(index_name=index_name, embedding=embeddings)
     retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 
-    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.5)
+    llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0.5)
 
     system_prompt = (
         "You are a cybersecurity expert analyzing a threat report. "
@@ -109,6 +109,24 @@ def stream_rag_response(user_query: str, index_name: str = "rag-project"):
 
     # stream output
     print(f"Streaming RAG pipeline for query: '{user_query}' \n")
+
+    retrieved_docs = []
+
     for chunk in rag_chain.stream({"input": user_query}):
+        if "context" in chunk:
+            retrieved_docs = chunk["context"]
+
         if "answer" in chunk:
             yield chunk["answer"]
+
+    if retrieved_docs:
+        yield "\n\n**Sources:**\n"
+
+        unique_sources = set()
+        for doc in retrieved_docs:
+            source_path = doc.metadata.get("source", "Unknown Document")
+            clean_source = source_path.split("/")[-1].split("\\")[-1]
+            unique_sources.add(clean_source)
+
+        for source in unique_sources:
+            yield f"- {source}\n"
