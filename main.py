@@ -28,11 +28,12 @@ def read_root():
 @app.post("/ask")
 def ask_question(request: dict):
     user_query = request.get("query")
+    chat_history = request.get("history", [])
 
     if not user_query:
         return {"Error": "No query provided"}
 
     return StreamingResponse(
-        stream_rag_response(user_query),
+        stream_rag_response(user_query, chat_history),
         media_type="text/event-stream"
     )

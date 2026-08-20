@@ -1,3 +1,5 @@
+let chatHistory = [];
+
 async function sendMessage() {
     const input = document.getElementById("query-input");
     const chatBox = document.getElementById("chat-box");
@@ -24,46 +26,50 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // 1. Send request to backend
+        // 3. Send request to backend with history
         const response = await fetch("/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: query })
+            body: JSON.stringify({ 
+                query: query,
+                history: chatHistory
+            })
         });
 
-        // 2. Remove the "Thinking" indicator as soon as the connection opens
+        // 4. Remove the "Thinking" indicator once the response starts
         const indicator = document.getElementById("thinking-indicator");
         if (indicator) indicator.remove();
 
-        // 3. Create the empty message div where the stream will type out
+        // 5. Create the message container for the streaming response
         const botMessageDiv = document.createElement("div");
         botMessageDiv.className = "message bot-message";
         chatBox.appendChild(botMessageDiv);
 
-        // 4. Read the stream chunk by chunk
+        // 6. Read and render the stream chunk by chunk
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
+        let rawMarkdown = "";
 
         while (true) {
             const { done, value } = await reader.read();
-            if (done) break; // Stream is finished
+            if (done) break;
 
-            // Decode the chunk of text and append it to the div
             const chunk = decoder.decode(value, { stream: true });
-            botMessageDiv.textContent += chunk;
+            rawMarkdown += chunk;
             
-            // Auto-scroll as text generates
+            // Parse Markdown to HTML in real-time
+            botMessageDiv.innerHTML = marked.parse(rawMarkdown);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-    } 
+        // 7. Save conversation to history for subsequent turns
+        chatHistory.push({ role: "user", content: query });
+        chatHistory.push({ role: "assistant", content: rawMarkdown });
 
-    catch (error) {
+    } catch (error) {
         // Remove thinking indicator on error
         const indicator = document.getElementById("thinking-indicator");
-        if (indicator) {
-            indicator.remove();
-        }
+        if (indicator) indicator.remove();
 
         // Display error message
         const errorDiv = document.createElement("div");
@@ -72,11 +78,11 @@ async function sendMessage() {
         chatBox.appendChild(errorDiv);
     }
 
-    // Scroll chat box to bottom
+    // Ensure final scroll position is at the bottom
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Optional: Allow pressing "Enter" to send message
+// Allow pressing "Enter" to send message
 document.getElementById("query-input")?.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
         sendMessage();
